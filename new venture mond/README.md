@@ -1,4 +1,4 @@
-# Flowmondo
+# Venturemond
 
 Premium Client & Admin Dashboard with Next.js Frontend and Python FastAPI Backend.
 
@@ -52,3 +52,4 @@ Premium Client & Admin Dashboard with Next.js Frontend and Python FastAPI Backen
 
 -   **Frontend**: Next.js, React, Phosphor Icons, CSS Modules.
 -   **Backend**: Python, FastAPI, Uvicorn.
+
