@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Venturemond</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<style>
+    /* Critical Fixes for Header Interactions */
+    .header {
+        position: relative;
+        z-index: 50;
+        /* Ensure header sits above dashboard cards */
+        background: var(--bg-app, #ffffff);
+        /* Ensure opacity so no click-through */
+    }
+
+    .dropdown-menu {
+        z-index: 1001;
+        /* Ensure dropdowns are on top of everything */
+    }
+</style>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar slide-in">
+        <div class="brand">
+            <i class="ph-fill ph-squares-four"></i> Venture<span>mond</span>
+        </div>
+
+        <nav>
+            <div class="nav-link active" onclick="switchTab('dashboard', this)">
+                <i class="ph ph-squares-four"></i> Dashboard
+            </div>
+            <div class="nav-link" onclick="switchTab('clients', this)">
+                <i class="ph ph-users"></i> Clients
+            </div>
+            <div class="nav-link" onclick="switchTab('analytics', this)">
+                <i class="ph ph-chart-line-up"></i> Analytics
+            </div>
+            <div class="nav-link" onclick="switchTab('invoices', this)">
+                <i class="ph ph-receipt"></i> Invoices
+            </div>
+            <div style="flex-grow: 1;"></div>
+            <div class="nav-link" onclick="switchTab('settings', this)">
+                <i class="ph ph-gear"></i> Settings
+            </div>
+            <div class="nav-link" onclick="logout()">
+                <i class="ph ph-sign-out"></i> Logout
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header slide-in delay-1">
+            <div>
+                <h1 class="page-title">Admin Overview</h1>
+                <p style="color: var(--text-muted);">Welcome back, Administrator</p>
+            </div>
+            <div class="user-profile flex gap-md items-center" style="position: absolute; top: 1.5rem; right: 2rem;">
+                <div style="position: relative;">
+                    <button class="btn btn-outline" style="border: none; padding: 8px;"
+                        onclick="toggleHeaderDropdown('notif-dropdown')">
+                        <i class="ph ph-bell" style="font-size: 1.5rem;"></i>
+                        <div
+                            style="position: absolute; top: 5px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%;">
+                        </div>
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <div id="notif-dropdown" class="dropdown-menu" style="right: -60px; width: 320px;">
+                        <div class="dropdown-header">Notifications</div>
+                        <div class="dropdown-item">
+                            <i class="ph-fill ph-check-circle" style="color: var(--success); font-size: 1.2rem;"></i>
+                            <div>
+                                <div style="font-size: 0.85rem; font-weight: 500;">Invoice #INV-2024-012 Paid</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Received $150,000 from Stark
+                                    Ind.</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-item">
+                            <i class="ph-fill ph-user-plus" style="color: var(--primary); font-size: 1.2rem;"></i>
+                            <div>
+                                <div style="font-size: 0.85rem; font-weight: 500;">New Client: Acme Corp</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Signed up 2 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="p-2 text-center"
+                            onclick="switchTab('settings'); switchSettingsSubTab('notifications'); toggleHeaderDropdown('notif-dropdown');"
+                            style="border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--primary); cursor: pointer;">
+                            View all notifications</div>
+                    </div>
+                </div>
+
+                <div style="position: relative;">
+                    <div class="avatar" onclick="toggleHeaderDropdown('profile-dropdown')" style="cursor: pointer;">
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=5271ff&color=fff" alt="Admin">
+                    </div>
+                    <!-- Profile Dropdown -->
+                    <div id="profile-dropdown" class="dropdown-menu">
+                        <div class="p-3" style="border-bottom: 1px solid var(--border);">
+                            <div style="font-weight: 600;">Admin User</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">admin@Venturemond.com</div>
+                        </div>
+                        <div class="dropdown-item"
+                            onclick="switchTab('settings'); switchSettingsSubTab('profile'); toggleHeaderDropdown('profile-dropdown');">
+                            <i class="ph ph-user"></i> My Profile
+                        </div>
+                        <div class="dropdown-item"
+                            onclick="switchTab('settings'); switchSettingsSubTab('billing'); toggleHeaderDropdown('profile-dropdown');">
+                            <i class="ph ph-credit-card"></i> Billing
+                        </div>
+                        <div class="dropdown-item" onclick="logout()" style="color: var(--danger);">
+                            <i class="ph ph-sign-out"></i> Logout
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Tab -->
+        <div id="tab-dashboard" class="app-section">
+            <section class="stats-grid slide-in delay-2">
+                <div class="card stat-card" onclick="switchTab('clients')">
+                    <div class="flex justify-between items-center">
+                        <span class="stat-label">Total Clients</span>
+                        <i class="ph ph-users" style="color: var(--primary);"></i>
+                    </div>
+                    <div class="stat-value" id="stat-clients">0</div>
+                    <div style="color: var(--success); font-size: 0.8rem;">
+                        <i class="ph-fill ph-caret-up"></i> 12% vs last month
+                    </div>
+                </div>
+                <div class="card stat-card" onclick="switchTab('analytics')">
+                    <div class="flex justify-between items-center">
+                        <span class="stat-label">Monthly Revenue</span>
+                        <i class="ph ph-currency-dollar" style="color: var(--accent);"></i>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="stat-value" id="stat-revenue">$0k</div>
+                        <!-- Trend Graph -->
+                        <div style="width: 60px; height: 30px;">
+                            <svg width="60" height="30" viewBox="0 0 60 30" fill="none">
+                                <path d="M0 25 C10 25 15 10 30 15 C45 20 50 5 60 10" stroke="#00C851" stroke-width="2"
+                                    fill="none" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div style="color: var(--success); font-size: 0.8rem;">
+                        <i class="ph-fill ph-caret-up"></i> 8% vs last month
+                    </div>
+                </div>
+                <div class="card stat-card" onclick="switchTab('clients')">
+                    <div class="flex justify-between items-center">
+                        <span class="stat-label">Pending Projects</span>
+                        <i class="ph ph-hourglass" style="color: var(--warning);"></i>
+                    </div>
+                    <div class="stat-value" id="stat-pending">0</div>
+                    <div style="color: var(--success); font-size: 0.8rem;">
+                        Requires attention
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid slide-in delay-3" style="grid-template-columns: 2fr 1fr; gap: var(--space-lg);">
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3>Recent Clients</h3>
+                        <button class="btn btn-primary" onclick="switchTab('clients')">View All</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="recent-clients-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Project</th>
+                                    <th>Status</th>
+                                    <th>Budget</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card flex flex-col">
+                    <h3 class="mb-4">Revenue Trend</h3>
+                    <div
+                        style="flex: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; height: 180px; padding-top: 10px;">
+                        <div class="flex flex-col items-center gap-xs"
+                            style="width: 12%; height: 100%; justify-content: flex-end;">
+                            <div
+                                style="width: 100%; height: 40%; background: var(--primary); border-radius: 4px 4px 0 0; opacity: 0.7;">
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Mon</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-xs"
+                            style="width: 12%; height: 100%; justify-content: flex-end;">
+                            <div
+                                style="width: 100%; height: 65%; background: var(--primary); border-radius: 4px 4px 0 0; opacity: 0.8;">
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Tue</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-xs"
+                            style="width: 12%; height: 100%; justify-content: flex-end;">
+                            <div
+                                style="width: 100%; height: 50%; background: var(--primary); border-radius: 4px 4px 0 0; opacity: 0.7;">
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Wed</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-xs"
+                            style="width: 12%; height: 100%; justify-content: flex-end;">
+                            <div
+                                style="width: 100%; height: 85%; background: var(--primary); border-radius: 4px 4px 0 0;">
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Thu</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-xs"
+                            style="width: 12%; height: 100%; justify-content: flex-end;">
+                            <div
+                                style="width: 100%; height: 60%; background: var(--primary); border-radius: 4px 4px 0 0; opacity: 0.8;">
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Fri</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-xs"
+                            style="width: 12%; height: 100%; justify-content: flex-end;">
+                            <div
+                                style="width: 100%; height: 75%; background: var(--accent); border-radius: 4px 4px 0 0;">
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Sat</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-xs"
+                            style="width: 12%; height: 100%; justify-content: flex-end;">
+                            <div
+                                style="width: 100%; height: 95%; background: var(--accent); border-radius: 4px 4px 0 0;">
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Sun</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4" style="border-top: 1px solid var(--border);">
+                        <div class="flex justify-between items-center">
+                            <span style="color:var(--text-muted); font-size: 0.9rem;">Weekly Projection</span>
+                            <span style="font-weight: 600; color: var(--success);">+12.5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clients Tab -->
+        <div id="tab-clients" class="app-section hidden">
+            <div class="card slide-in">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Client Database</h2>
+                    <button class="btn btn-primary" onclick="showAddClientForm()">Add Client</button>
+                </div>
+                <div class="table-container">
+                    <table id="all-clients-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Project</th>
+                                <th>Status</th>
+                                <th>Budget</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Details Tab (Hidden by default) -->
+        <div id="tab-client-details" class="app-section hidden">
+            <div class="card slide-in">
+                <div class="flex items-center mb-4 gap-md">
+                    <button class="btn btn-outline" onclick="switchTab('clients')">
+                        <i class="ph ph-arrow-left"></i> Back
+                    </button>
+                    <h2 id="detail-name">Client Name</h2>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 2fr; gap: var(--space-xl);">
+                    <div class="flex flex-col gap-lg">
+                        <div class="avatar" style="width: 100px; height: 100px; margin: 0 auto;">
+                            <img id="detail-avatar" src="" alt="Client"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="card" style="background: var(--bg-app);">
+                            <h4 class="mb-4">Contact Info</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">
+                                <i class="ph ph-envelope"></i> <span id="detail-email">email@example.com</span>
+                            </p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                                <i class="ph ph-phone"></i> +1 (555) 000-0000
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-lg">
+                        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                            <div class="card" style="padding: var(--space-md); background: var(--bg-app);">
+                                <p class="stat-label">Current Project</p>
+                                <h3 id="detail-project">Project Name</h3>
+                                <span class="badge badge-success" id="detail-status">Active</span>
+                            </div>
+                            <div class="card" style="padding: var(--space-md); background: var(--bg-app);">
+                                <p class="stat-label">Total Budget</p>
+                                <h3 id="detail-budget">$0k</h3>
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: var(--bg-app);">
+                            <h4 class="mb-4">Project Overview</h4>
+                            <p style="color: var(--text-muted);">
+                                This client is currently undergoing a major transformation phase.
+                                Deliverables include UI/UX redesign, backend migration, and security auditing.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Client Tab (Hidden by default) -->
+        <div id="tab-add-client" class="app-section hidden">
+            <div class="card slide-in" style="max-width: 600px; margin: 0 auto;">
+                <div class="flex items-center mb-4 gap-md">
+                    <button class="btn btn-outline" onclick="switchTab('clients')">
+                        <i class="ph ph-arrow-left"></i> Cancel
+                    </button>
+                    <h2>Add New Client</h2>
+                </div>
+
+                <form id="addClientForm" onsubmit="handleNewClient(event)">
+                    <div class="form-group">
+                        <label>Company Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Acme Corp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" name="project" class="form-control" placeholder="e.g. Website Redesign"
+                            required>
+                    </div>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                        <div class="form-group">
+                            <label>Budget</label>
+                            <input type="text" name="budget" class="form-control" placeholder="e.g. $50k" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select name="status" class="form-control">
+                                <option value="Active">Active</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Delayed">Delayed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-full mt-4">Create Client Account</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Placeholders -->
+        <div id="tab-analytics" class="app-section hidden">
+            <div class="flex justify-between items-center mb-4 slide-in">
+                <h2 class="page-title">Revenue Analytics</h2>
+                <select id="analytics-year-select" class="form-control" style="width: auto; padding: 6px 12px;"
+                    onchange="updateAnalytics()">
+                    <option value="2024">Year: 2024</option>
+                    <option value="2023">Year: 2023</option>
+                </select>
+            </div>
+
+            <div class="stats-grid slide-in delay-1">
+                <div class="card stat-card">
+                    <span class="stat-label">Total Revenue (YTD)</span>
+                    <div class="stat-value" id="an-total">$1.2M</div>
+                    <div style="color: var(--success); font-size: 0.8rem;" id="an-total-trend"><i
+                            class="ph-fill ph-trend-up"></i> +18.4% vs last year</div>
+                </div>
+                <div class="card stat-card">
+                    <span class="stat-label">Avg. Monthly Revenue</span>
+                    <div class="stat-value" id="an-avg">$104k</div>
+                    <div style="color: var(--text-muted); font-size: 0.8rem;" id="an-avg-target">target: $100k</div>
+                </div>
+                <div class="card stat-card" onclick="showPendingInvoices()">
+                    <span class="stat-label">Pending Invoices</span>
+                    <div class="stat-value" id="an-pending">$128k</div>
+                    <div style="color: var(--warning); font-size: 0.8rem;">Click to view details <i
+                            class="ph-fill ph-arrow-right"></i></div>
+                </div>
+            </div>
+
+            <div class="grid slide-in delay-2" style="grid-template-columns: 2fr 1fr; gap: var(--space-lg);">
+                <div class="card">
+                    <h3 class="mb-4">Monthly Performance</h3>
+                    <div id="analytics-chart"
+                        style="height: 300px; display: flex; align-items: flex-end; gap: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                        <!-- Chart Bars will be rendered by JS -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="mb-4">Top Sources</h3>
+                    <div class="flex flex-col gap-md" id="analytics-sources">
+                        <!-- Sources will be rendered by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                /* User provided styles moved to style.css but kept here if specific overrides needed, though cleaner to move. Leaving inline as per request */
+                /* Actually user's provided code had styles inside <body> for tabs? */
+                /* I will respect the structure provided */
+                .chart-col {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    flex: 1;
+                    height: 100%;
+                    justify-content: flex-end;
+                    gap: 8px;
+                }
+
+                .chart-col span {
+                    font-size: 0.75rem;
+                    color: var(--text-muted);
+                }
+
+                .chart-bar {
+                    width: 100%;
+                    background: var(--bg-hover);
+                    border-radius: 4px;
+                    transition: height 1s ease;
+                    position: relative;
+                }
+
+                .chart-bar:hover,
+                .chart-bar.active {
+                    background: linear-gradient(to top, var(--primary), var(--accent));
+                    box-shadow: 0 0 15px var(--primary-glow);
+                }
+
+                .split-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid var(--border);
+                }
+
+                .split-row:last-child {
+                    border: none;
+                }
+            </style>
+        </div>
+
+        <div id="tab-invoices" class="app-section hidden">
+            <div class="card slide-in">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Outstanding Invoices</h2>
+                    <div class="badge badge-warning" id="pending-count-badge">3 Pending</div>
+                </div>
+                <div class="table-container">
+                    <table id="invoices-table">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>Invoice ID</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="app-section hidden">
+            <!-- Settings content simplified for brevity but structure preserved -->
+            <h2 class="page-title mb-4 slide-in">Platform Settings</h2>
+            <div class="grid slide-in delay-1" style="grid-template-columns: 250px 1fr; gap: var(--space-xl);">
+                <!-- Settings Navigation -->
+                <div class="flex flex-col gap-sm">
+                    <div class="card" style="padding: 0; overflow: hidden; position: sticky; top: 20px;">
+                        <div
+                            style="padding: var(--space-md); border-bottom: 1px solid var(--border); font-weight: 600;">
+                            Preference Menu</div>
+                        <div class="flex flex-col gap-0">
+                            <button class="settings-nav-btn active" onclick="switchSettingsSubTab('profile', this)"><i
+                                    class="ph ph-user"></i> Profile</button>
+                            <button class="settings-nav-btn" onclick="switchSettingsSubTab('security', this)"><i
+                                    class="ph ph-shield"></i> Security</button>
+                            <button class="settings-nav-btn" onclick="switchSettingsSubTab('notifications', this)"><i
+                                    class="ph ph-bell"></i> Notifications</button>
+                            <button class="settings-nav-btn" onclick="switchSettingsSubTab('billing', this)"><i
+                                    class="ph ph-credit-card"></i> Billing</button>
+                            <div style="height: 1px; background: var(--border); margin: 5px 0;"></div>
+                            <button class="settings-nav-btn text-danger"
+                                onclick="switchSettingsSubTab('danger', this)"><i class="ph ph-warning"></i> Danger
+                                Zone</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Settings Content Area -->
+                <div class="flex flex-col gap-lg">
+                    <!-- Profile Sub-Tab -->
+                    <div id="set-profile" class="settings-sub-section">
+                        <div class="card">
+                            <h3 class="mb-4">Admin Profile</h3>
+                            <div class="flex items-center gap-lg mb-4">
+                                <div class="avatar" style="width: 80px; height: 80px;"><img
+                                        src="https://ui-avatars.com/api/?name=Admin+User&background=5271ff&color=fff&size=128"
+                                        alt="Admin"></div>
+                                <div><button class="btn btn-outline" style="font-size: 0.8rem;">Change Avatar</button>
+                                </div>
+                            </div>
+                            <form onsubmit="event.preventDefault(); alert('Profile Updated Successfully!');">
+                                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                                    <div class="form-group"><label>First Name</label><input type="text"
+                                            class="form-control" value="Admin"></div>
+                                    <div class="form-group"><label>Last Name</label><input type="text"
+                                            class="form-control" value="User"></div>
+                                </div>
+                                <div class="form-group"><label>Email Address</label><input type="email"
+                                        class="form-control" value="admin@Venturemond.com"></div>
+                                <button class="btn btn-primary">Save Profile</button>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Security Sub-Tab -->
+                    <div id="set-security" class="settings-sub-section hidden">
+                        <div class="card">
+                            <h3 class="mb-4">Security</h3>
+                            <form onsubmit="event.preventDefault(); alert('Password updated!');">
+                                <div class="form-group">
+                                    <label>Current Password</label>
+                                    <input type="password" class="form-control" placeholder="••••••••">
+                                </div>
+                                <div class="form-group">
+                                    <label>New Password</label>
+                                    <input type="password" class="form-control" placeholder="New Password">
+                                </div>
+                                <div class="form-group">
+                                    <label>Confirm Password</label>
+                                    <input type="password" class="form-control" placeholder="Confirm New Password">
+                                </div>
+                                <button class="btn btn-primary">Update Password</button>
+                            </form>
+                            <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border);">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 style="margin:0;">Two-Factor Authentication</h4>
+                                    <p class="text-muted" style="font-size: 0.8rem;">Add an extra layer of security.</p>
+                                </div>
+                                <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Other settings placeholders -->
+                    <div id="set-notifications" class="settings-sub-section hidden">
+                        <div class="card">
+                            <h3 class="mb-4">Notifications</h3>
+                            <div class="flex flex-col gap-md">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 style="margin:0;">Email Alerts</h4>
+                                        <p class="text-muted" style="font-size: 0.8rem;">Receive updates via email.</p>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" checked><span
+                                            class="slider"></span></label>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 style="margin:0;">Browser Push</h4>
+                                        <p class="text-muted" style="font-size: 0.8rem;">Receive notifications in
+                                            browser.</p>
+                                    </div>
+                                    <label class="switch"><input type="checkbox" checked><span
+                                            class="slider"></span></label>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 style="margin:0;">Weekly Reports</h4>
+                                        <p class="text-muted" style="font-size: 0.8rem;">Summary of weekly activity.</p>
+                                    </div>
+                                    <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="set-billing" class="settings-sub-section hidden">
+                        <div class="card">
+                            <h3 class="mb-4">Billing</h3>
+                            <div class="card" style="background: var(--bg-hover); margin-bottom: 20px;">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 style="margin:0;">Professional Plan</h4>
+                                        <p class="text-muted" style="font-size: 0.8rem;">$29/month • Billed annually</p>
+                                    </div>
+                                    <span class="badge badge-success">Active</span>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label>Payment Method</label>
+                                <div class="flex items-center gap-md p-2 mt-2"
+                                    style="border: 1px solid var(--border); border-radius: 4px;">
+                                    <i class="ph-fill ph-credit-card" style="font-size: 1.5rem;"></i>
+                                    <div style="flex:1;">
+                                        <div style="font-weight: 500;">Visa ending in 4242</div>
+                                        <div style="font-size: 0.8rem; text-muted;">Expires 12/28</div>
+                                    </div>
+                                    <button class="btn btn-outline" style="font-size: 0.8rem;">Edit</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-full" onclick="manageSubscription()">Manage
+                                Subscription</button>
+                        </div>
+                    </div>
+                    <div id="set-danger" class="settings-sub-section hidden">
+                        <div class="card" style="border-color: var(--danger);">
+                            <h3>Danger Zone</h3><button class="btn" style="background:var(--danger);color:white;"
+                                onclick="handleDeleteAccount()">Delete Account</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .settings-nav-btn {
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
+                    padding: 12px 16px;
+                    border: none;
+                    background: transparent;
+                    color: var(--text-muted);
+                    text-align: left;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border-left: 3px solid transparent;
+                }
+
+                .settings-nav-btn:hover {
+                    background: var(--bg-hover);
+                    color: var(--text-main);
+                }
+
+                .settings-nav-btn.active {
+                    background: var(--bg-hover);
+                    color: var(--primary);
+                    border-left-color: var(--primary);
+                    font-weight: 500;
+                }
+
+                .settings-nav-btn i {
+                    margin-right: 12px;
+                    font-size: 1.1rem;
+                }
+
+                .text-danger {
+                    color: var(--danger) !important;
+                }
+
+                .text-danger:hover {
+                    background: rgba(255, 77, 77, 0.1) !important;
+                }
+            </style>
+        </div>
+
+    </main>
+    <script>
+        // Check Auth - Critical for redirect loop fix
+        // We will assume index.html sets this. If not, we might loop. 
+        // For safety during development/demo, we can comment out strict redirect or ensure index.html sets it.
+        const session = JSON.parse(localStorage.getItem('user_session'));
+        if (!session || session.role !== 'admin') {
+            console.warn('No session found. Redirecting to login...');
+            window.location.href = 'index.html';
+        }
+
+        let clientsData = [];
+
+        function manageSubscription() {
+            alert("Redirecting to Stripe Customer Portal...");
+        }
+
+        async function init() {
+            try {
+                // Mock API by defaulting to error flow or local data
+                throw new Error('Using Mock Data path');
+            } catch (error) {
+                console.log('Initializing with mock data');
+                clientsData = [
+                    { name: 'Stark Industries', project: 'Arc Reactor UI', status: 'Active', budget: '$500k', avatar: 'S' },
+                    { name: 'Wayne Enterprises', project: 'Batcave Security', status: 'Pending', budget: '$850k', avatar: 'W' },
+                    { name: 'Cyberdyne', project: 'Skynet Protocol', status: 'Delayed', budget: '$1.2M', avatar: 'C' },
+                    { name: 'Umbrella Corp', project: 'Viral Marketing', status: 'Active', budget: '$200k', avatar: 'U' },
+                ];
+                renderTables();
+                document.getElementById('stat-clients').innerText = '142';
+                document.getElementById('stat-revenue').innerText = '$45.2k';
+                document.getElementById('stat-pending').innerText = '18';
+            }
+        }
+
+        function renderTables() {
+            const createRow = (c, i) => `<tr onclick="showClientDetails('${c.name}')" style="cursor: pointer;">
+                <td>
+                    <div class="flex items-center gap-sm">
+                        <div class="avatar" style="width: 24px; height: 24px; border: none;">
+                            <img src="https://ui-avatars.com/api/?name=${c.name}&background=random&color=fff" alt="${c.name}">
+                        </div>
+                        ${c.name}
+                    </div>
+                </td>
+                <td>${c.project}</td>
+                <td><span class="badge badge-${c.status === 'Active' ? 'success' : 'warning'}">${c.status}</span></td>
+                <td>${c.budget}</td>
+            </tr>`;
+
+            document.querySelector('#recent-clients-table tbody').innerHTML = clientsData.slice(0, 5).map(createRow).join('');
+            document.querySelector('#all-clients-table tbody').innerHTML = clientsData.map(createRow).join('');
+        }
+
+        const allInvoices = [
+            { client: 'Wayne Enterprises', id: '#INV-2024-001', amount: '$85,000', date: 'Oct 15, 2024', status: 'Overdue' },
+            { client: 'Cyberdyne Systems', id: '#INV-2024-045', amount: '$32,500', date: 'Nov 01, 2024', status: 'Pending' },
+            { client: 'Massive Dynamic', id: '#INV-2024-089', amount: '$10,500', date: 'Nov 20, 2024', status: 'Pending' },
+            { client: 'Stark Industries', id: '#INV-2024-012', amount: '$150,000', date: 'Dec 01, 2024', status: 'Paid' },
+            { client: 'Acme Corp', id: '#INV-2024-015', amount: '$2,400', date: 'Dec 05, 2024', status: 'Paid' },
+            { client: 'Umbrella Corp', id: '#INV-2024-022', amount: '$45,000', date: 'Dec 10, 2024', status: 'Paid' }
+        ];
+
+        function renderAllInvoices() {
+            const rows = allInvoices.map(inv => `
+                <tr>
+                    <td style="font-weight: 500;">${inv.client}</td>
+                    <td style="color: var(--text-muted);">${inv.id}</td>
+                    <td>${inv.amount}</td>
+                    <td>${inv.date}</td>
+                    <td><span class="badge badge-${inv.status === 'Overdue' ? 'danger' : inv.status === 'Pending' ? 'warning' : 'success'}">${inv.status}</span></td>
+                    <td>
+                        ${inv.status !== 'Paid' ? '<button class="btn btn-outline" onclick="alert(\'Reminder sent!\')" style="padding: 4px 8px; font-size: 0.8rem;">Remind</button>' : '<button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.8rem;" disabled>Paid</button>'}
+                    </td>
+                </tr>
+            `).join('');
+
+            document.querySelector('#invoices-table tbody').innerHTML = rows;
+        }
+
+        // --- Analytics Logic ---
+        const analyticsData = {
+            '2024': {
+                total: '$1.2M', trend: '18.4%', avg: '$104k', pending: '$128k',
+                chart: [45, 55, 40, 70, 65, 85, 50, 60, 95, 75, 40, 30],
+                top: [
+                    { name: 'Stark Ind.', val: '$500k', status: 'success' },
+                    { name: 'Wayne Ent.', val: '$350k', status: 'warning' },
+                    { name: 'Cyberdyne', val: '$210k', status: 'success' },
+                    { name: 'Massive D.', val: '$180k', status: 'success' }
+                ]
+            },
+            '2023': {
+                total: '$980k', trend: '12.1%', avg: '$82k', pending: '$45k',
+                chart: [30, 40, 35, 50, 45, 60, 55, 65, 70, 60, 50, 45],
+                top: [
+                    { name: 'Umbrella Corp', val: '$400k', status: 'success' },
+                    { name: 'Wayne Ent.', val: '$200k', status: 'success' },
+                    { name: 'Stark Ind.', val: '$150k', status: 'warning' },
+                    { name: 'Globex', val: '$100k', status: 'success' }
+                ]
+            }
+        };
+
+        const pendingInvoices = [
+            { client: 'Wayne Enterprises', id: '#INV-2024-001', amount: '$85,000', date: 'Oct 15, 2024', status: 'Overdue' },
+            { client: 'Cyberdyne Systems', id: '#INV-2024-045', amount: '$32,500', date: 'Nov 01, 2024', status: 'Pending' },
+            { client: 'Massive Dynamic', id: '#INV-2024-089', amount: '$10,500', date: 'Nov 20, 2024', status: 'Pending' },
+        ];
+
+        function updateAnalytics() {
+            try {
+                const year = document.getElementById('analytics-year-select').value;
+                const data = analyticsData[year];
+
+                // Update Stats
+                document.getElementById('an-total').innerText = data.total;
+                document.getElementById('an-avg').innerText = data.avg;
+                document.getElementById('an-pending').innerText = data.pending;
+                document.getElementById('an-total-trend').innerHTML = `<i class="ph-fill ph-trend-up"></i> +${data.trend} vs last year`;
+
+                // Update Chart
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const chartHtml = data.chart.map((val, i) => `
+                    <div class="chart-col">
+                        <div class="chart-bar ${i === 8 ? 'active' : ''}" style="height: ${val}%;"></div><span>${months[i]}</span>
+                    </div>
+                `).join('');
+                document.getElementById('analytics-chart').innerHTML = chartHtml;
+
+                // Update Sources
+                const sourcesHtml = data.top.map((s, i) => `
+                    <div class="split-row" onclick="showClientDetails('${s.name}')" style="cursor: pointer;">
+                        <div class="flex items-center gap-sm">
+                            <span style="font-weight: 600;">${i + 1}. ${s.name}</span>
+                        </div>
+                        <span class="badge badge-${s.status}">${s.val}</span>
+                    </div>
+                `).join('');
+                document.getElementById('analytics-sources').innerHTML = sourcesHtml + `
+                    <div class="mt-4 p-4" style="background: var(--bg-hover); border-radius: var(--radius-md);">
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">
+                            ProTip: ${year === '2024' ? 'September peak due to Skynet contract.' : 'Consistent growth seen in Q3 2023.'}
+                        </p>
+                    </div>
+                `;
+            } catch (e) { console.error('Analytics Update Failed', e); }
+        }
+
+        function showPendingInvoices() {
+            switchTab('invoices');
+            const rows = pendingInvoices.map(inv => `
+                <tr>
+                    <td style="font-weight: 500;">${inv.client}</td>
+                    <td style="color: var(--text-muted);">${inv.id}</td>
+                    <td>${inv.amount}</td>
+                    <td>${inv.date}</td>
+                    <td><span class="badge badge-${inv.status === 'Overdue' ? 'danger' : 'warning'}">${inv.status}</span></td>
+                    <td><button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.8rem;">Remind</button></td>
+                </tr>
+            `).join('');
+            document.querySelector('#invoices-table tbody').innerHTML = rows;
+        }
+
+        // Initialize Analytics on load
+        updateAnalytics();
+        renderAllInvoices(); // Initialize Invoices Table
+
+        window.switchSettingsSubTab = function (subTabId, el) {
+            document.querySelectorAll('.settings-nav-btn').forEach(b => b.classList.remove('active'));
+            if (el) el.classList.add('active');
+            document.querySelectorAll('.settings-sub-section').forEach(s => s.classList.add('hidden'));
+            const target = document.getElementById('set-' + subTabId);
+            if (target) target.classList.remove('hidden');
+        };
+
+        // Initialize
+        init();
+
+        function showClientDetails(clientName) {
+            const client = clientsData.find(c => c.name === clientName);
+            if (!client) return;
+
+            document.getElementById('detail-name').innerText = client.name;
+            document.getElementById('detail-project').innerText = client.project;
+            document.getElementById('detail-budget').innerText = client.budget;
+            document.getElementById('detail-status').innerText = client.status;
+            document.getElementById('detail-status').className = `badge badge-${client.status === 'Active' ? 'success' : 'warning'}`;
+            document.getElementById('detail-avatar').src = `https://ui-avatars.com/api/?name=${client.name}&background=random&color=fff&size=200`;
+            document.getElementById('detail-email').innerText = client.email || (client.name.toLowerCase().replace(/\s/g, '.') + '@example.com');
+            const phoneEl = document.getElementById('detail-phone'); // May not exist in DOM
+
+            document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('tab-client-details').classList.remove('hidden');
+        }
+
+        function showAddClientForm() {
+            document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('tab-add-client').classList.remove('hidden');
+        }
+
+        function handleNewClient(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const newClient = {
+                name: formData.get('name'),
+                project: formData.get('project'),
+                budget: formData.get('budget'),
+                status: formData.get('status'),
+                avatar: formData.get('name').charAt(0).toUpperCase()
+            };
+            clientsData.unshift(newClient);
+            renderTables();
+            document.getElementById('stat-clients').innerText = parseInt(document.getElementById('stat-clients').innerText) + 1;
+            switchTab('clients');
+            e.target.reset();
+        }
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            if (el) el.classList.add('active');
+            document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+            const tab = document.getElementById('tab-' + tabId);
+            if (tab) tab.classList.remove('hidden');
+        }
+
+        function logout() {
+            localStorage.removeItem('user_session');
+            window.location.href = 'index.html';
+        }
+
+        function toggleHeaderDropdown(id) {
+            document.querySelectorAll('.dropdown-menu').forEach(d => { if (d.id !== id) d.classList.remove('show'); });
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('show');
+            event.stopPropagation();
+        }
+
+        window.addEventListener('click', function (e) {
+            if (!e.target.closest('.user-profile')) {
+                document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+            }
+        });
+
+        function handleDeleteAccount() {
+            const confirmation = prompt("Type 'DELETE' to confirm:");
+            if (confirmation === 'DELETE') {
+                alert('Account scheduled for deletion.');
+                logout();
+            }
+        }
+        function changePlan() { if (prompt("New plan?")) alert("Plan changed."); }
+        function cancelSubscription() { if (confirm("Cancel sub?")) alert("Cancelled."); }
+    </script>
+</body>
+
+</html>
